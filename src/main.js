@@ -1,4 +1,5 @@
 import { createElement, appendChildren } from "./tools";
+import feather from 'feather-icons';
 
 // creating the layout
 export const layout = () => {
@@ -67,7 +68,7 @@ const createMain = () => {
     const mainTopLeft = createElement("div", "main-top-left");
     const mainTopRight = createElement("div", "main-top-right");
 
-    const projectTitle = createElement("h1", "project-title", "project-title");
+    const projectTitle = createElement("h1", "project-title", "project-title", "Project title");
     appendChildren(mainTopLeft.render(), projectTitle.render());
 
     const projectEdit = createElement("button", "project-btn", "project-edit-btn", "Edit");
@@ -81,32 +82,55 @@ const createMain = () => {
 
     const addTaskBtn = createElement("button", "add-task-btn", "add-task-btn", "+ Add new task");
     appendChildren(mainBottomTop.render(), addTaskBtn.render());
-
-    // const firstList = createListItem();
-    // appendChildren(mainBottomBottom.render(), firstList.render());
     
     appendChildren(mainBottom.render(), mainBottomTop.render(), mainBottomBottom.render());
 
-    // Appending to parent(main)
     appendChildren(main.render(), mainTop.render(), mainBottom.render());
     return main;
 }
-
 // todo list element
-export const createListItem = (todoTitle='', date, priorityLevel) => {
+export const createListItem = (todoTitle='Default', date="01-01-2026", priorityLevel, description, count) => {
+    // const lorem  = "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dignissimos repellendus dolor officia cumque laborum inventore dolorem, ratione quis voluptas, beatae tempora eos consectetur dicta earum quo quam velit magni! Magnam.";
     const listItemContainer = createElement("div", "list-item-container", "list-item-container");
-    const priority = createElement("div", priorityLevel, "priority",);
-    const info = createElement("div", "info", "info");
-    appendChildren(listItemContainer.render(), priority.render(), info.render());
-    const infoLeft = createElement("div", "info-left");
-    const infoRight = createElement("div", "info-right");
-    appendChildren(info.render(), infoLeft.render(), infoRight.render());
-    const checkbox = createElement("input");
-    checkbox.setAttr("type", "checkbox");
-    const name = createElement("div", "list-name", "list-name", todoTitle);
-    const dueDate = createElement("p", "due-date", "due-date", `Due: ${date}`);
-    appendChildren(infoLeft.render(), checkbox.render(), name.render());
-    appendChildren(infoRight.render(), dueDate.render());
+    listItemContainer.setAttr("data-count", count);
+    // Main divs
+    const listItemLeft = createElement("div", priorityLevel, "priority");
+    const listItemRight = createElement("div", "list-info", "list-info");
+    // 2nd level divs(information)
+    const listTop = createElement("div", "list-item-top", "list-item-top");
+    const listBottom = createElement("div", "list-item-bottom", "list-item-bottom");
+    // 3rd level divs(information-top)
+    const listTopLeft = createElement("div", "list-top-left", "list-top-left");
+        const checkbox = createElement("input", "checkbox", "checkbox");
+        checkbox.setAttr("type", "checkbox");
+        const title = createElement("h1", "list-item-title", "list-item-title", todoTitle);
+        appendChildren(listTopLeft.render(), checkbox.render(), title.render());
+    const listTopRight = createElement("div", "list-top-right", "list-top-right");
+        const dueDate = createElement("div", "due-date", "due-date", `Due: ${date}`);
+        dueDate.render().classList.add('view');
+        const btnDiv = createElement("div", "control-btn", 'control-btn');
+            const editIcon = feather.icons['edit-2'].toSvg();
+            // editIcon.setAttribute('id', 'edit-task-id');
+            const deleteIcon = feather.icons['trash-2'].toSvg();
+            // deleteIcon.setAttribute('id', 'delete-task-id');
+            const editBtn = createElement("div", "edit-task-btn", "edit-task-btn");
+            editBtn.setAttr("data-count", count);
+            editBtn.render().innerHTML = editIcon;
+            const deleteBtn = createElement("div", "delete-task-btn", "delete-task-btn");
+            deleteBtn.setAttr("data-count", count);
+            deleteBtn.render().innerHTML = deleteIcon;
+            appendChildren(btnDiv.render(), editBtn.render(), deleteBtn.render())
+        appendChildren(listTopRight.render(), dueDate.render(), btnDiv.render());
+    appendChildren(listTop.render(), listTopLeft.render(), listTopRight.render());
+    // 3rd level divs(information-bottom)
+    const listBottomTop = createElement("div", "list-bottom-top", "", "Description:");
+    description = (description == ''|| description == null) ? "No  description.": description;
+    const listBottomBottom = createElement("div", "list-bottom-bottom", "", description);
+    appendChildren(listBottom.render(), listBottomTop.render(), listBottomBottom.render());
+
+
+    appendChildren(listItemRight.render(), listTop.render(), listBottom.render());
+    appendChildren(listItemContainer.render(), listItemLeft.render(), listItemRight.render());
     return listItemContainer;
 }
 
@@ -206,6 +230,71 @@ export const createTask = () => {
     const btnDiv = createElement("div", "task-btn-div");
     const submitBtn = createElement("button", "task-submit-btn", "task-submit-btn", "Create");
     const cancelBtn = createElement("button", "task-cancel-btn", "task-cancel-btn", "Cancel");
+    appendChildren(btnDiv.render(), submitBtn.render(), cancelBtn.render());
+
+    appendChildren(form.render(), createMsg.render(), taskDiv.render(), desDiv.render(), additionalDiv.render(), btnDiv.render());
+    
+    return form
+
+}
+export const editTask = () => {
+    const form = createElement("form", "task-form");
+
+    // Form title
+    const createMsg = createElement("div", "form-title", "", "Edit task");
+
+    // Task input
+    const taskDiv = createElement("div", "task-div");
+    const taskLabel = createElement("label", "task-input-label", "", "Task name");
+    const taskInput = createElement("input", "task-name-input", "task-name-input");
+    taskInput.setAttr("placeholder", "Type task name");
+    taskInput.setAttr("type", "text");
+    taskInput.setAttr("name", "taskName")
+    taskLabel.setAttr("for", "task-name-input");
+    appendChildren(taskDiv.render(), taskLabel.render(), taskInput.render());
+
+    // Description input
+    const desDiv = createElement("div", "description-div");
+    const desLabel = createElement("label", "description-label", " ", "Description(optional)");
+    const desInput = createElement("textarea", "description-input", "description-input");
+    desInput.setAttr("name", "description");
+    desInput.setAttr("placeholder", "Add description...");
+    desLabel.setAttr("for", "description-input");
+    appendChildren(desDiv.render(), desLabel.render(), desInput.render());
+
+    // Priority and Due data inputs
+    const additionalDiv = createElement("div", "additional-data");
+    // Left
+    const additionalDivLeft = createElement("div", "data-div");
+    const selectLabel = createElement("label", "select-label", "", "Priority");
+    const selectInput = createElement("select", "select-priority-input", "select-priority-input");
+    selectInput.setAttr("name", "priority");
+    selectLabel.setAttr("for", "select-priority-input");
+    const lowOption = createElement("option", "", "", "Low");
+    const mediumOption = createElement("option", "", "", "Medium");
+    const highOption = createElement("option", "", "", "High");
+    lowOption.setAttr("value", "low");
+    lowOption.setAttr("selected", "");
+    mediumOption.setAttr("value", "medium");
+    highOption.setAttr("value", "high");
+    appendChildren(selectInput.render(), lowOption.render(), mediumOption.render(), highOption.render());
+    appendChildren(additionalDivLeft.render(), selectLabel.render(), selectInput.render());
+    // Right
+    const additionalDivRight = createElement("div", "data-div");
+    const dateLabel = createElement("label", "date-label", "", "Due date");
+    const dateInput = createElement("input", "date-input", "date-input");
+    dateInput.setAttr("name", "date");
+    dateInput.setAttr("type", "date");
+    dateLabel.setAttr("for", "date-input");
+    appendChildren(additionalDivRight.render(), dateLabel.render(), dateInput.render());
+    appendChildren(additionalDiv.render(), additionalDivLeft.render(), additionalDivRight.render());
+
+    // Buttons
+    const btnDiv = createElement("div", "task-btn-div");
+    const submitBtn = createElement("button", "edit-submit-btn", "edit-submit-btn", "Edit");
+    submitBtn.render().classList.add('task-submit-btn');
+    const cancelBtn = createElement("button", "edit-cancel-btn", "edit-cancel-btn", "Cancel");
+    cancelBtn.render().classList.add('task-cancel-btn');
     appendChildren(btnDiv.render(), submitBtn.render(), cancelBtn.render());
 
     appendChildren(form.render(), createMsg.render(), taskDiv.render(), desDiv.render(), additionalDiv.render(), btnDiv.render());

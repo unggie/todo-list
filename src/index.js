@@ -1,16 +1,16 @@
 import "./style.css";
-import { layout, createProject, createProjectName, createListItem, createTask, editProject } from "./main";
+import { layout, createProject, createProjectName, createListItem, createTask, editProject, editTask } from "./main";
 import { todoListItem } from "./todoListItem";
 
 const layoutContainer = layout();
 document.body.appendChild(layoutContainer.render());
 const taskForm = createTask();
-// document.body.appendChild(taskForm.render())
 const form =  createProject();
 const edit = editProject();
+const editTaskElement = editTask(); 
 
 // project list array
-let projectCollection = [];
+let projects = [];
 const createProjectItem = (name) => {
     let projectItem = {
         name: name,
@@ -19,14 +19,45 @@ const createProjectItem = (name) => {
     projectCollection.push(projectItem);
 }
 
+const defaultData = {
+    name: "Learn TaskFlow",
+    todoItems: [
+        todoListItem("How to view to descrition[Click Me!!!].", "This is the description. It shows you additional information. To hide it just click it again", new Date().getDate(), "high"),
+        todoListItem("How to edit and delete tasks", "To edit or delete a task, hover(move pointer on) over the task and two icons will appear. Click the pencil to edit and trash bin to delete", new Date().getDate(), "low")
+    ]
+}
+
+// Local storage
+const initializeProject = () => {
+    let data = loadProject("projectCollection");
+    if (!data) {
+        projects.push(defaultData);
+        saveProject(projects);
+        return data = loadProject("projectCollection");
+    }
+    return data;
+}
+const saveProject = (projects) => {
+    localStorage.setItem("projectCollection", JSON.stringify(projects));
+}
+const loadProject = (name) => {
+    const data = JSON.parse(localStorage.getItem(name));
+    return data;
+}
+let projectCollection = initializeProject();
+// let projectCollection = [];
+
+
 // Adding an event listener by add a listener to the body element
 let currentProject = 0;
+// let description = false;
 const body = document.querySelector("body");
 body.addEventListener("click", (event) => {
-    event.preventDefault();
-    const target = event.target.id;
+    if (event.target.type !== "checkbox") event.preventDefault();
+    const target = event.target;
+    const targetId = target.id;
 
-    switch (target) {
+    switch (targetId) {
 
         // create and add project to project collection
         case 'add-project':
@@ -36,7 +67,6 @@ body.addEventListener("click", (event) => {
             const selected = event.target;
             const index = selected.dataset.id;
             currentProject = index;
-            console.log(currentProject);
             displayInfo(projectCollection[index]);
             break; 
         case 'submit-project-btn':
@@ -61,7 +91,6 @@ body.addEventListener("click", (event) => {
             projectCollection[currentProject].todoItems.push(createTaskItem(taskName));
             removeTaskForm();
             displayInfo(projectCollection[currentProject]);
-            // console.log(projectCollection);
             break;
         case 'task-cancel-btn':
             removeTaskForm();
@@ -81,11 +110,22 @@ body.addEventListener("click", (event) => {
             if (newName == null || newName == '') return alert("Enter the project name");
             projectCollection[currentProject].name = newName;
             removeEditForm();
+            addProject();
             displayInfo(projectCollection[currentProject]);
             break;
         case 'cancel-new-project-btn':
             removeEditForm();
             displayInfo(projectCollection[currentProject]);
+            break;
+        case 'project-delete-btn':
+            if (projectCollection == '') {
+                const projectTitle = document.querySelector('.project-title');
+                projectTitle.value = 'Project title';
+            } else {
+                projectCollection.splice(currentProject, 1);
+                addProject();
+                displayInfo(projectCollection[0]);
+            }
             break;
         default:
             console.log("No function");
@@ -93,6 +133,68 @@ body.addEventListener("click", (event) => {
 
     }
 });
+document.addEventListener('pointerover', (e) => {
+  const listInfo = e.target.closest('.list-info');
+  if (listInfo) listInfo.classList.add('hover');
+});
+
+document.addEventListener('pointerout', (e) => {
+  const listInfo = e.target.closest('.list-info');
+  if (!listInfo) return;
+  if (listInfo.contains(e.relatedTarget)) return;
+
+  listInfo.classList.remove('hover');
+});
+let currentTask = 0;
+document.addEventListener('click', (event) => {
+    const deleteBtn = event.target.closest('.delete-task-btn');
+    const editBtn = event.target.closest('.edit-task-btn');
+    const editFinal = event.target.closest('.edit-submit-btn');
+    const editCancel = event.target.closest('.edit-cancel-btn');
+    const description = event.target.closest('.list-info');
+    const checkBox = event.target.closest('.checkbox');
+
+    if (checkBox) {
+        let state = checkBox.checked;
+        const item = event.target.closest('.list-item-container');
+        const title = item.childNodes[1].childNodes[0].childNodes[0].childNodes[1];
+        currentTask = item.dataset.count;
+        projectCollection[currentProject].todoItems[currentTask].checked = state;
+        if (state) {
+            title.classList.add("checked-task");
+        } else {
+            title.classList.remove("checked-task");
+        }
+        return;
+    }
+    if (deleteBtn) {
+        projectCollection[currentProject].todoItems.splice(deleteBtn.dataset.count, 1);
+        displayInfo(projectCollection[currentProject]);
+        return;
+    }
+    if (editBtn) {
+        currentTask = editBtn.dataset.count;
+        editTaskFunction();
+        return;
+    }
+    if (editFinal) {
+        rewriteTask(currentTask);
+        removeTaskEdit();
+        displayInfo(projectCollection[currentProject]);
+        return;
+    }
+    if (editCancel) {
+        removeTaskEdit();
+        displayInfo(projectCollection[currentProject]);
+        return;
+    }
+    if (description) {
+        const item = event.target.closest('.list-item-container');
+        item.classList.toggle('open');
+        return;
+    }
+
+})
 
 // ----- These functions are for the creating and removal of project forms and appending children to the side bar -----//
 
@@ -134,18 +236,38 @@ const removeEditForm = () => {
 
 // Display info
 const displayInfo = (element) => {
+    saveProject(projectCollection);
+    let count = 0;
     const projectTitle = document.querySelector('.project-title');
+    if (projectCollection === ''|| projectCollection == null) projectTitle = 'Project title'; 
     const list = document.querySelector('.main-bottom-bottom');
     list.replaceChildren();
-    projectTitle.textContent = element.name;
-    element.todoItems.forEach(element => {
-        list.appendChild(createListItem(element.title, element.dueDate, element.priority).render());
-    })
+    if (projectCollection.length == 0 || projectCollection == '') {
+        projectTitle.textContent = 'Project title';
+    } else {
+        projectTitle.textContent = element.name; 
+        element.todoItems.forEach(element => {
+            const item = createListItem(element.title, element.dueDate, element.priority, element.description, count).render();
+            const title = item.childNodes[1].childNodes[0].childNodes[0].childNodes[1];
+            const checkBox = item.childNodes[1].childNodes[0].childNodes[0].childNodes[0];
+            if (element.checked == true) {
+                title.classList.add("checked-task");
+                checkBox.checked = true;
+                list.appendChild(item);
+            } else {
+                list.appendChild(item);
+            }
+            count++;
+        })
+    }
 }
 
 // --------- These functions are for creating the create task form and items-----------//
 const createTaskForm = () => {
-    if (projectCollection.length == 0 || projectCollection == null) return alert("Tasks must be part of a project. Create project first.");
+    if (projectCollection.length == 0 || projectCollection == null) {
+        alert("Tasks must be part of a project. Create project first.");
+        return createFormFunction();
+    }
     document.body.removeChild(layoutContainer.render());
     document.body.appendChild(taskForm.render());
     const taskName = document.querySelector('.task-name-input');
@@ -167,42 +289,24 @@ const createTaskItem = (name) => {
     return todoListItem(name, taskDescription, dueDate, priority);
 }
 
-// ------------------------This is for testing purposes only----------------------------
-
-// import { todoListItem } from "./todoListItem";
-// import { project } from "./projects";
-// import { projectList } from "./projectList";
-// import { storeData, readData, removeData } from "./storage";
-// import { createElement } from "./tools"; 
-
-// const homework = todoListItem("Homework", "This is my science homework", "15th march 2026", "very important");
-// const poetry = todoListItem("Poetry", "This is a famous piece written by shakespare", "16th march 2026", "medium");
-// const chores = project("School Work", homework, poetry);
-
-// const dished = todoListItem("Plates", "This is my science homework", "15th march 2026", "very important");
-// const washing = todoListItem("clothes", "This is a famous piece written by shakespare", "16th march 2026", "medium");
-// const cleaning = project("Home Work", dished, washing);
-
-// const data = projectList(chores, cleaning);
-
-// storeData('demoData', data);
-
-// const storedData = readData('demoData');
-
-// console.log("This is the stored data: ", storedData);
-
-// const title = createElement("h1", "","heading");
-// title.setAttr("class", "headingclass")
-// title.setText(data.projectListArray[0].todoListItems[0].description);
-// // title.render();
-
-// console.log(data.projectListArray[0].todoListItems[0].description);
-// console.log("Data:", data);
-// console.log(projectList(chores, cleaning));
-// console.log(chores);
-// console.log(newNote);
-
-// const body = document..bdquerySelector(body);
-// body.appendChild(title);
-
-// document.body.appendChild(title.render());
+const editTaskFunction = () => {
+    document.body.removeChild(layoutContainer.render());
+    document.body.appendChild(editTaskElement.render());
+    const name = document.querySelector('.task-name-input');
+    name.focus();
+    name.value = "";
+}
+const rewriteTask = index => {
+    const form = document.querySelector('.task-form');
+    const data = Object.fromEntries(new FormData(form));
+    projectCollection[currentProject].todoItems[index].title = (data.taskName == null || data.taskName == "") ? projectCollection[currentProject].todoItems[index].title: data.taskName;
+    projectCollection[currentProject].todoItems[index].dueDate = (data.date == null || data.date == "") ? projectCollection[currentProject].todoItems[index].dueDate: data.date;
+    projectCollection[currentProject].todoItems[index].description = data.description;
+    projectCollection[currentProject].todoItems[index].priority = data.priority;
+}
+const removeTaskEdit = () => {
+    document.body.removeChild(editTaskElement.render());
+    document.body.appendChild(layoutContainer.render());
+}
+addProject();
+displayInfo(projectCollection[0]);

@@ -22,13 +22,6 @@ export const createElement = (type, className="", idName="", text="") => {
 
 export const appendChildren = (parent, ...children) => {
     children.forEach(child => {
-        // console.log(child);
         parent.appendChild(child);
     });
 }
-
-// export const appendChildren = (element, ...args) => {
-//     args.forEach((item) => {
-//         element.appendChild(item);
-//     })
-// }

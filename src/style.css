@@ -286,19 +286,21 @@ body {
 /* todo list item style */
 .list-item-container{
   border: 1px solid var(--color-border);
-  display: flex;
-  justify-content: space-between;
-  height: 75px;
+  border-radius: 10px;
   width: 100%;
-  border-radius: 5px;
-  background: #f6f6f6;
+  min-height: 75px;
+  max-height: auto;
+  display: flex;
+  align-items: stretch;
   flex-shrink: 0;
-
+}
+.list-item-container:hover{
+  cursor: pointer;
 }
 #priority{
-  border-radius: 5px 0 0 5px;
-  height: 100%;
+  border-radius: 7.5px 0 0 7.5px;
   width: 10px;
+  flex-grow: 1;
 }
 .low{
   background: var(--color-accent);
@@ -309,47 +311,141 @@ body {
 .high{
   background: var(--color-danger);
 }
-.info{
-  border: none;
+.sucess{
+  background: var(--color-success);
+}
+.list-info{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.list-item-top{
+  height: 55px;
   flex-grow: 1;
+  flex-shrink: 0;
+  overflow-y: hidden;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 30px;
 }
-.info-left{
+.list-top-left{
+  flex-grow: 1;
+
+  padding-left: 10px;
+
   display: flex;
+  align-items: center;
   gap: 10px;
+}
+.list-top-right{
+  width: 150px;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
-input[type=checkbox] {
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  border: 1px solid #c9c9c9;
+.control-btn{
+  gap: 15px;
+}
+
+.control-btn {
+  display: none;
+  width: 100%;
+  height: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 25px;
+
+}
+
+.list-info.hover .control-btn {
+  display: flex;
+}
+
+.list-info.hover .due-date {
+  display: none;
+}
+
+
+.control-btn div{
+  height: 30px;
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #3b82f6;
   transition: 250ms;
 }
-input[type="checkbox"]:hover{
+.control-btn div:hover{
   cursor: pointer;
-  background: #e8e8e8;
 }
-input[type="checkbox"]:checked {
-  background-color: #b1b1b1;
-  border: none;
+.edit-task-btn:hover{
+  color: var(--color-success);
 }
-.list-name{
-  font-size: 1.45rem;
+.delete-task-btn:hover{
+  color: var(--color-danger);
+}
+.list-item-bottom{
+  flex-grow: 1;
+  flex-shrink: 0;
+  width: 100%;
+  border-top: 1px solid var(--color-border);
+  padding-top: 5px;
+  display: none;
+  flex-direction: column;
+}
+.list-item-container.open .list-item-bottom{
+  display: flex;
+}
+.list-bottom-top{
+  height: 30px;
+  padding: 5px 0;
+  font-size: 1rem;
   color: var(--color-text-dim);
 }
+.list-bottom-bottom{
+  border: 1px solid #ececec;
+  border-radius: 5px;
+  padding: 5px;
+  flex-grow: 1;
+  width: 100%;
+  font-size: .9rem;
+  color: var(--color-text);
+}
+
+/* Checkbox and title */
+.checkbox{
+  height: 25px;
+  width: 25px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+.checkbox:hover{
+  cursor: pointer;
+  background: var(--color-accent-light);
+  border: 1px solid var(--color-accent-light);
+}
+.list-item-title{
+  font-size: 1.35rem;
+  font-weight: var(--fw-);
+  color: var(--color-text);
+}
+.list-item-title.checked-task{
+  color: var(--color-text-dim);
+  text-decoration: line-through;
+}
+/* Due date */
 .due-date{
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: var(--color-text-dim);
-  padding-right: 10px;
+
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  transition: 250ms;
 }
-
-
 /* --------Forms and others --------- */
 /* Create project form style */
 .project-form{
@@ -488,8 +584,8 @@ input[type="checkbox"]:checked {
   font-size: .9rem;
 }
 .select-priority-input:focus, .date-input:focus{
-  outline: 1px solid var(--color-success);
-  border: none;
+  border: 1px solid var(--color-success);
+  outline: none;
 }
 /* Button */
 .task-btn-div{
