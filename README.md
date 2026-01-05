@@ -78,8 +78,11 @@ npm run dev
 - Auto rebuilds upon saving
 
 ## 6. **Demo/Visual**
+
 [Live demo](https://unggie.github.io/todo-list/)
+
 ![first image](./images/firstImage.png)
+
 ![second image](./images/secondImage.png)
 
 
